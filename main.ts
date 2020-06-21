@@ -1,14 +1,14 @@
 input.onButtonPressed(Button.A, function () {
-    if (gameStatus != 0) {
+    if (gameStatus == 2) {
         if (myXSpot > 0) {
-            led.toggle(myXSpot, myYSpot)
+            led.unplot(myXSpot, myYSpot)
             myXSpot = myXSpot - 1
-            led.toggle(myXSpot, myYSpot)
+            led.plot(myXSpot, myYSpot)
         }
     }
 })
 function intervalFire () {
-    while (gameStatus == 1) {
+    while (gameStatus == 2) {
         goDown()
     }
 }
@@ -20,12 +20,12 @@ function checkIfHit (num: number, num2: number) {
 }
 input.onButtonPressed(Button.AB, function () {
     if (gameStatus == 1) {
-        led.unplot(myXSpot, myYSpot)
-        gameStatus = 2
-    } else if (gameStatus == 2) {
         led.plot(myXSpot, myYSpot)
-        gameStatus = 1
+        gameStatus = 2
         intervalFire()
+    } else if (gameStatus == 2) {
+        led.unplot(myXSpot, myYSpot)
+        gameStatus = 1
     } else {
         basic.showLeds(`
             . . . . .
@@ -34,31 +34,35 @@ input.onButtonPressed(Button.AB, function () {
             . . . . .
             . . . . .
             `)
-        gameStatus = 2
+        gameStatus = 1
     }
 })
 input.onButtonPressed(Button.B, function () {
-    if (gameStatus != 0) {
+    if (gameStatus == 2) {
         if (myXSpot < 4) {
-            led.toggle(myXSpot, myYSpot)
+            led.unplot(myXSpot, myYSpot)
             myXSpot = myXSpot + 1
-            led.toggle(myXSpot, myYSpot)
+            led.plot(myXSpot, myYSpot)
         }
     }
 })
 function goDown () {
     shineXSpot = randint(0, 4)
     shineYSpot = 0
-    led.toggle(shineXSpot, shineYSpot)
-    for (let index = 0; index < 5; index++) {
-        basic.pause(200)
-        led.unplot(shineXSpot, shineYSpot)
-        shineYSpot = shineYSpot + 1
-        led.plot(shineXSpot, shineYSpot)
+    for (let index = 0; index <= 4; index++) {
         if (checkIfHit(shineXSpot, shineYSpot)) {
-            led.unplot(myXSpot, myYSpot)
-            basic.showIcon(IconNames.No)
             gameStatus = 0
+            basic.showIcon(IconNames.No)
+            break;
+        } else {
+            led.plot(shineXSpot, shineYSpot)
+            basic.pause(200)
+            if (checkIfHit(shineXSpot, shineYSpot) == false) {
+                led.unplot(shineXSpot, shineYSpot)
+            }
+            if (index != 4) {
+                shineYSpot = shineYSpot + 1
+            }
         }
     }
 }
@@ -67,7 +71,10 @@ let shineXSpot = 0
 let myYSpot = 0
 let myXSpot = 0
 let gameStatus = 0
-// 0:over, 1:start, 2:stop
+// 0:over, 1:stop, 2:start
 gameStatus = 1
 myXSpot = 2
 myYSpot = 4
+if (gameStatus == 1) {
+    basic.showString("A+B!")
+}
